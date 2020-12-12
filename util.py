@@ -6,6 +6,7 @@ from functools import *
 from itertools import *
 from parse import *
 from copy import *
+from math import *
 
 
 def p(*a, **k):
