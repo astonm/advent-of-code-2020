@@ -72,5 +72,33 @@ def next_factor(factors_and_nums, mod, target):
     assert "shouldn't get here", (factors_and_nums, mod, target)
 
 
+@cli.command()
+@click.argument("input", type=click.File())
+def part3(input):
+    data = [process_line2(l) for l in read_file(input)]
+    buses = data[1]
+
+    # from above:
+    # t = 0 + 17 * (6 + 13 * (15 + 19*0)) = 3417
+    #     x   ^^    x   ^^    xx   ^^        (carets indicate bus numbers, x's indicate found x factors)
+    #
+    # this is a pain to calculate because each inductive step has us redo work. rearranging a bit...
+    # t = 17 * 6 + 17 * 13 * 15 + 17 * 13 * 19 * 0 = 3417
+    # t = (17) * 6 + (17 * 13) * 15 + (17 * 13 * 19) * 0 = 3417
+    # written this way, we see an accumulating product multiplied by our same x factors
+    # an intuition behind that accumulating product is that it's the cycle length of the buses we've
+    # seen so far, and that by adding any multiple of it, we retain our moduli thus far.
+    # we can clearly do this sum more incrementally without repeating work, and simplify our code, too.
+
+    cycle_len, sum_so_far = 1, 0
+    for bus_num, offset in buses:
+        for i in range(bus_num):
+            sum_so_far += cycle_len
+            if sum_so_far % bus_num == (bus_num - offset) % bus_num:
+                break
+        cycle_len *= bus_num
+    print(sum_so_far)
+
+
 if __name__ == "__main__":
     cli()
