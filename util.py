@@ -2,6 +2,7 @@ import sys
 
 import click
 from collections import *
+from collections.abc import *
 from functools import *
 from itertools import *
 from parse import *
@@ -13,7 +14,7 @@ def p(*a, **k):
     return print(*a, **k)
 
 
-def read_file(input, delim=None):
+def read_file(input, delim="\n"):
     return [l.strip() for l in input.read().strip().split(delim)]
 
 
@@ -128,6 +129,29 @@ class Grid:
         return self.lines == other.lines
 
 
+class Vector(list):
+    def _broadcast(self, other):
+        if isinstance(other, Iterable):
+            return zip(self, other)
+        else:
+            return zip(self, [other] * len(self))
+
+    def __add__(self, other):
+        return [x.__add__(y) for (x, y) in self._broadcast(other)]
+
+    def __sub__(self, other):
+        return [x.__sub__(y) for (x, y) in self._broadcast(other)]
+
+    def __mul__(self, other):
+        return [x.__mul__(y) for (x, y) in self._broadcast(other)]
+
+    def __truediv__(self, other):
+        return [x.__truediv__(y) for (x, y) in self._broadcast(other)]
+
+    def __floordiv__(self, other):
+        return [x.__floordiv__(y) for (x, y) in self._broadcast(other)]
+
+
 def softconv(val, converter, default=None):
     try:
         return converter(val)
@@ -139,7 +163,13 @@ def softint(s, default=None):
     return softconv(s, int, default)
 
 
-def product(l):
+def first(l, default=None):
+    if not l:
+        return default
+    return l[0]
+
+
+def prod(l):
     return reduce(lambda x, y: x * y, l)
 
 
