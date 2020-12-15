@@ -54,5 +54,29 @@ def part2(input, pos):
     print(last)
 
 
+@cli.command()
+@click.argument("input", type=click.File())
+@click.argument("pos", type=int)
+def part3(input, pos):
+    data = [process_line(l) for l in read_file(input)][0]
+
+    prev_ind = defaultdict(list)
+    for i, k in enumerate(data):
+        prev_ind[k].append(i)
+
+    num = data[-1]
+    for i in range(len(data), pos):
+        indices = prev_ind[num]
+
+        if len(indices) < 2:
+            num = 0
+        else:
+            num = indices[-1] - indices[-2]
+
+        prev_ind[num].append(i)
+
+    print(num)
+
+
 if __name__ == "__main__":
     cli()
