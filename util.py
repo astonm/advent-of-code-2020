@@ -164,9 +164,7 @@ def softint(s, default=None):
 
 
 def first(l, default=None):
-    if not l:
-        return default
-    return l[0]
+    return next(iter(l), default)
 
 
 def prod(l):
