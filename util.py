@@ -98,9 +98,9 @@ class Grid:
         self.lines[y][x] = val
 
     @staticmethod
-    def neighbors(x, y, include_diags=False):
+    def neighbors(x, y, diags=False):
         deltas = Grid.UDLR
-        if include_diags:
+        if diags:
             deltas += Grid.DIAGS
 
         out = []
@@ -127,6 +127,89 @@ class Grid:
 
     def __eq__(self, other):
         return self.lines == other.lines
+
+
+class GridN:
+    Throw = object()
+
+    def __init__(self, default=Throw):
+        self.g = {}
+        self.default = default
+        self._dim = None
+
+    @property
+    def dim(self):
+        if not self._dim:
+            self._dim = len(first(self.g))
+        return self._dim
+
+    def bounds(self):
+        # inclusive
+        mins = [min(self.g, key=lambda d: d[i])[i] for i in range(self.dim)]
+        maxs = [max(self.g, key=lambda d: d[i])[i] for i in range(self.dim)]
+        return [range(mins[i], maxs[i] + 1) for i in range(self.dim)]
+
+    def get(self, p):
+        if p in self.g:
+            return self.g[p]
+
+        if self.default is GridN.Throw:
+            raise ValueError(f"Invalid position {p}")
+        else:
+            return self.default
+
+    def get_multi(self, ps):
+        return [self.get(p) for p in ps]
+
+    def set(self, p, val):
+        self.g[p] = val
+
+    def neighbors(self, p, diags=False):
+        pxs = []
+        if not diags:
+            for cx in [-1, 1]:
+                for i in range(self.dim):
+                    pxs.append(tuple([0] * i + [cx] + [0] * (self.dim - i - 1)))
+        else:
+            for prod in product([-1, 0, 1], repeat=self.dim):
+                if not all(c == 0 for c in prod):
+                    pxs.append(prod)
+        out = []
+        for px in pxs:
+            np = tuple(d + dx for (d, dx) in zip(p, px))
+            if np in self.g or self.default is not GridN.Throw:
+                out.append((np, self.g.get(np, self.default)))
+        return out
+
+    def walk(self):
+        yield from self.g.items()
+
+    def walk_all(self, pad=0):
+        assert self.default is not GridN.Throw, "No default set. Did you mean .walk()?"
+        padded_bounds = [range(r.start - pad, r.stop + pad) for r in self.bounds()]
+        for p in product(*padded_bounds):
+            yield p, self.get(p)
+
+    def print(self, sep="", vsep="\n"):
+        putc = lambda c: print(c, end="", sep="")
+
+        bounds_size = [len(b) for b in self.bounds()]
+        dim_prods = [prod(bounds_size[:i]) for i in range(1, len(bounds_size))]
+        for i, (p, v) in enumerate(self.walk_all()):
+            putc(v)
+            for dp in dim_prods:
+                if (i + 1) % dp == 0:
+                    putc("\n")
+
+    def copy(self):
+        out = GridN()
+        out.g = deepcopy(self.g)
+        out.default = self.default
+        out._dim = self._dim
+        return out
+
+    def __eq__(self, other):
+        return self.g == other.g
 
 
 class Vector(list):

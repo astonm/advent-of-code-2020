@@ -88,5 +88,27 @@ def part2(input):
     print(sum(v == "#" for v in g.values()))
 
 
+@cli.command()
+@click.argument("input", type=click.File())
+def part3(input):
+    g = GridN(default=".")
+    for y, line in enumerate(read_file(input)):
+        for x, c in enumerate(line):
+            g.set((x, y, 0), c)
+
+    for _ in range(6):
+        # g.print()
+        ng = g.copy()
+        for p, val in g.walk_all(pad=1):
+            nearby_actives = [n for n in g.neighbors(p, diags=True) if n[1] == "#"]
+            if val == "#":
+                ng.set(p, "#" if len(nearby_actives) in (2, 3) else ".")
+            else:
+                ng.set(p, "#" if len(nearby_actives) == 3 else ".")
+        g = ng
+
+    print(sum(v == "#" for _, v in g.walk()))
+
+
 if __name__ == "__main__":
     cli()
