@@ -7,19 +7,7 @@ def process_line(line):
 
 def doit(s):
     while "(" in s:
-        start = s.find("(")
-        c = 1
-        i = start + 1
-        while c and i < len(s):
-            if s[i] == "(":
-                c += 1
-            if s[i] == ")":
-                c -= 1
-            i += 1
-        end = i
-
-        sub = doit(s[start + 1 : end - 1])
-        s = s[:start] + str(sub) + " " + s[end + 1 :]
+        s = re.sub(r"(\([^()]+\))", lambda m: str(doit(m.group(0)[1:-1])), s)
 
     parts = [x for x in s.split() if x]
     o = int(parts[0])
@@ -38,19 +26,7 @@ def doit(s):
 
 def doit2(s):
     while "(" in s:
-        start = s.find("(")
-        c = 1
-        i = start + 1
-        while c and i < len(s):
-            if s[i] == "(":
-                c += 1
-            if s[i] == ")":
-                c -= 1
-            i += 1
-        end = i
-
-        sub = doit2(s[start + 1 : end - 1])
-        s = s[:start] + str(sub) + " " + s[end + 1 :]
+        s = re.sub(r"(\([^()]+\))", lambda m: str(doit2(m.group(0)[1:-1])), s)
 
     q = " ".join([x for x in s.split() if x])
     if "*" in q:
