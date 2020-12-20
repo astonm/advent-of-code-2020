@@ -127,6 +127,22 @@ class Grid:
     def copy(self):
         return Grid(deepcopy(self.lines))
 
+    def transpose(self):
+        transposed = self.copy()
+        transposed.width, transposed.height = self.height, self.width
+        transposed.lines = list(zip(*self.lines))
+        return transposed
+
+    def fliplr(self):
+        flipped = self.copy()
+        flipped.lines = [l[::-1] for l in self.lines]
+        return flipped
+
+    def flipud(self):
+        flipped = self.copy()
+        flipped.lines = self.lines[::-1]
+        return flipped
+
     def __eq__(self, other):
         return self.lines == other.lines
 
@@ -222,19 +238,19 @@ class Vector(list):
             return zip(self, [other] * len(self))
 
     def __add__(self, other):
-        return [x.__add__(y) for (x, y) in self._broadcast(other)]
+        return Vector([x.__add__(y) for (x, y) in self._broadcast(other)])
 
     def __sub__(self, other):
-        return [x.__sub__(y) for (x, y) in self._broadcast(other)]
+        return Vector([x.__sub__(y) for (x, y) in self._broadcast(other)])
 
     def __mul__(self, other):
-        return [x.__mul__(y) for (x, y) in self._broadcast(other)]
+        return Vector([x.__mul__(y) for (x, y) in self._broadcast(other)])
 
     def __truediv__(self, other):
-        return [x.__truediv__(y) for (x, y) in self._broadcast(other)]
+        return Vector([x.__truediv__(y) for (x, y) in self._broadcast(other)])
 
     def __floordiv__(self, other):
-        return [x.__floordiv__(y) for (x, y) in self._broadcast(other)]
+        return Vector([x.__floordiv__(y) for (x, y) in self._broadcast(other)])
 
 
 def softconv(val, converter, default=None):
