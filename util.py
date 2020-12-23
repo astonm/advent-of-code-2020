@@ -1,6 +1,7 @@
 import sys
 
 import click
+import time
 from collections import *
 from collections.abc import *
 from functools import *
@@ -9,6 +10,7 @@ from parse import *
 from copy import *
 from math import *
 from pprint import pprint, pformat
+from sys import exit
 import re
 
 
@@ -286,3 +288,15 @@ def lget(l, k, default=None):
         return l[k]
     else:
         return default
+
+
+def time_it(f):
+    @wraps(f)
+    def wrap(*args, **kw):
+        ts = time.time()
+        result = f(*args, **kw)
+        dt = time.time() - ts
+        print(f"timing <{f.__name__}> took: {dt:2.4f} sec")
+        return result
+
+    return wrap
