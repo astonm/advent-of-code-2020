@@ -254,6 +254,18 @@ class Vector(list):
     def __floordiv__(self, other):
         return Vector([x.__floordiv__(y) for (x, y) in self._broadcast(other)])
 
+    # default list operator overrides
+
+    def __iadd__(self, other):  # override list concatenation
+        for i, (x, y) in enumerate(self._broadcast(other)):
+            self[i] = x.__add__(y)
+        return self
+
+    def __imul__(self, other):  # override list multiplication
+        for i, (x, y) in enumerate(self._broadcast(other)):
+            self[i] = x.__mul__(y)
+        return self
+
 
 def softconv(val, converter, default=None):
     try:
